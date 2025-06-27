@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ministry Tracker</title>
+    <!-- Local Tailwind CSS -->
+    <link href="tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Smooth transitions */
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        /* Bottom navigation for mobile */
+        @media (max-width: 768px) {
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 40;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            }
+            .main-content {
+                padding-bottom: 80px;
+            }
+        }
+        
+        /* Input focus effects */
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        
+        /* Button hover effects */
+        .btn-hover:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Auth Section -->
+    <div id="auth-section" class="fixed inset-0 bg-gray-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <div class="text-center mb-6">
+                <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-hands-praying text-blue-600 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Ministry Tracker</h2>
+                <p class="text-gray-500 mt-1">Track your ministry activities</p>
+            </div>
+            
+            <div id="auth-forms">
+                <!-- Login Form -->
+                <div id="login-form">
+                    <form id="login-form-element" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input type="email" id="login-email" required 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="login-password" required 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                            </div>
+                            <button type="button" id="forgot-password-btn" class="text-sm text-blue-600 hover:text-blue-800">
+                                Forgot password?
+                            </button>
+                        </div>
+                        <button type="submit" 
+                            class="btn-hover transition-all w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Sign In
+                        </button>
+                        <div class="text-center text-sm text-gray-500">
+                            Don't have an account? 
+                            <button type="button" id="show-signup-btn" class="text-blue-600 hover:text-blue-800 font-medium">
+                                Sign up
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Signup Form -->
+                <div id="signup-form" class="hidden">
+                    <form id="signup-form-element" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input type="email" id="signup-email" required 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="signup-password" required 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+                        </div>
+                        <button type="submit" 
+                            class="btn-hover transition-all w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Create Account
+                        </button>
+                        <div class="text-center text-sm text-gray-500">
+                            Already have an account? 
+                            <button type="button" id="show-login-btn" class="text-blue-600 hover:text-blue-800 font-medium">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Forgot Password Form -->
+                <div id="forgot-form" class="hidden">
+                    <form id="forgot-form-element" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input type="email" id="reset-email" required 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                            </div>
+                        </div>
+                        <button type="submit" 
+                            class="btn-hover transition-all w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Send Reset Link
+                        </button>
+                        <div class="text-center text-sm text-gray-500">
+                            Remember your password? 
+                            <button type="button" id="back-to-login-btn" class="text-blue-600 hover:text-blue-800 font-medium">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Auth Messages -->
+            <div id="auth-message" class="mt-4 p-3 rounded-lg hidden text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
+    <div id="app-content" class="hidden max-w-4xl mx-auto">
+        <!-- App Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-30">
+            <div class="px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-hands-praying text-blue-600 text-xl mr-2"></i>
+                    <h1 class="text-xl font-bold text-gray-800">Ministry Tracker</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="notifications-btn" class="p-2 text-gray-500 hover:text-blue-600 relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                    </button>
+                    <button id="sign-out-btn" class="p-2 text-gray-500 hover:text-blue-600">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content px-4 py-4">
+            <!-- Connection Status -->
+            <div id="connection-status" class="mb-4 p-3 rounded-lg hidden text-sm flex items-center">
+                <i class="fas fa-circle mr-2 text-xs"></i>
+                <p></p>
+            </div>
+            
+            <!-- Desktop Tabs Navigation -->
+            <div class="hidden md:flex border-b mb-6">
+                <button id="contacts-tab" class="px-4 py-3 font-medium text-blue-600 border-b-2 border-blue-600 flex items-center">
+                    <i class="fas fa-users mr-2"></i> Contacts
+                </button>
+                <button id="time-tab" class="px-4 py-3 font-medium text-gray-500 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-clock mr-2"></i> Time Tracking
+                </button>
+                <button id="stats-tab" class="px-4 py-3 font-medium text-gray-500 hover:text-blue-600 flex items-center">
+                    <i class="fas fa-chart-bar mr-2"></i> Monthly Stats
+                </button>
+            </div>
+            
+            <!-- Contacts Tab -->
+            <div id="contacts-content" class="tab-content">
+                <div class="bg-white rounded-xl shadow p-5 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Add New Contact</h2>
+                        <button id="toggle-contact-form" class="p-2 text-gray-500 hover:text-blue-600">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="contact-form" class="space-y-4 transition-all duration-300 overflow-hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="name" required 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-phone text-gray-400"></i>
+                                    </div>
+                                    <input type="tel" id="phone" 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
+                                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                </div>
+                                <textarea id="address" rows="2" 
+                                    class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"></textarea>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Publication Placed</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-book text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="publication" 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Return Visit Time</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-calendar-alt text-gray-400"></i>
+                                    </div>
+                                    <input type="datetime-local" id="return-time" 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" 
+                                class="btn-hover transition-all px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <i class="fas fa-plus mr-2"></i> Add Contact
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Your Contacts</h2>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="contact-search" placeholder="Search contacts..." 
+                                class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border max-w-xs">
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <!-- Mobile Cards View -->
+                        <div id="contacts-list-mobile" class="space-y-3 md:hidden">
+                            <!-- Mobile contact cards will be added here dynamically -->
+                        </div>
+                        
+                        <!-- Desktop Table View -->
+                        <table id="contacts-list-desktop" class="min-w-full divide-y divide-gray-200 hidden md:table">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Visit</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contacts-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Contacts will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Time Tracking Tab -->
+            <div id="time-content" class="tab-content hidden">
+                <div class="bg-white rounded-xl shadow p-5 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Record Time</h2>
+                    <form id="time-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-calendar text-gray-400"></i>
+                                    </div>
+                                    <input type="date" id="time-date" required 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hours</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-clock text-gray-400"></i>
+                                    </div>
+                                    <input type="number" id="hours" step="0.25" min="0" required 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Minutes</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-stopwatch text-gray-400"></i>
+                                    </div>
+                                    <input type="number" id="minutes" min="0" max="59" required 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Bible Studies</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-bible text-gray-400"></i>
+                                    </div>
+                                    <input type="number" id="bible-studies" min="0" 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Return Visits</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-undo text-gray-400"></i>
+                                    </div>
+                                    <input type="number" id="return-visits" min="0" 
+                                        class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" 
+                                class="btn-hover transition-all px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <i class="fas fa-save mr-2"></i> Record Time
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Time Records</h2>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="time-search" placeholder="Search records..." 
+                                class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border max-w-xs">
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <!-- Mobile Cards View -->
+                        <div id="time-records-mobile" class="space-y-3 md:hidden">
+                            <!-- Mobile time record cards will be added here dynamically -->
+                        </div>
+                        
+                        <!-- Desktop Table View -->
+                        <table id="time-records-desktop" class="min-w-full divide-y divide-gray-200 hidden md:table">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bible Studies</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Visits</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="time-records" class="bg-white divide-y divide-gray-200">
+                                <!-- Time records will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Tab -->
+            <div id="stats-content" class="tab-content hidden">
+                <div class="bg-white rounded-xl shadow p-5">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Monthly Statistics</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-medium text-blue-800">Total Hours</h3>
+                                    <p id="total-hours" class="text-2xl font-bold text-blue-600 mt-1">0</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-clock text-blue-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-blue-600 mt-2">This month</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-medium text-green-800">Bible Studies</h3>
+                                    <p id="total-bible-studies" class="text-2xl font-bold text-green-600 mt-1">0</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fas fa-bible text-green-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-green-600 mt-2">This month</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-medium text-purple-800">Return Visits</h3>
+                                    <p id="total-return-visits" class="text-2xl font-bold text-purple-600 mt-1">0</p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <i class="fas fa-undo text-purple-600"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-purple-600 mt-2">This month</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="month-select" class="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-calendar-alt text-gray-400"></i>
+                            </div>
+                            <select id="month-select" 
+                                class="pl-10 input-focus block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                                <!-- Months will be added dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Monthly Progress</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Hours</span>
+                                    <span id="hours-percentage">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="hours-progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Bible Studies</span>
+                                    <span id="studies-percentage">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="studies-progress" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Return Visits</span>
+                                    <span id="visits-percentage">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div id="visits-progress" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+                        <button id="print-btn" 
+                            class="btn-hover transition-all px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center justify-center">
+                            <i class="fas fa-print mr-2"></i> Print Report
+                        </button>
+                        <button id="export-btn" 
+                            class="btn-hover transition-all px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center">
+                            <i class="fab fa-whatsapp mr-2"></i> Export to WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation for Mobile -->
+    <div id="bottom-nav" class="bottom-nav bg-white border-t border-gray-200 md:hidden">
+        <div class="flex justify-around">
+            <button id="mobile-contacts-tab" class="p-4 text-blue-600 border-t-2 border-blue-600 flex flex-col items-center">
+                <i class="fas fa-users mb-1"></i>
+                <span class="text-xs">Contacts</span>
+            </button>
+            <button id="mobile-time-tab" class="p-4 text-gray-500 flex flex-col items-center">
+                <i class="fas fa-clock mb-1"></i>
+                <span class="text-xs">Time</span>
+            </button>
+            <button id="mobile-stats-tab" class="p-4 text-gray-500 flex flex-col items-center">
+                <i class="fas fa-chart-bar mb-1"></i>
+                <span class="text-xs">Stats</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Contact Detail Modal -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800" id="modal-contact-name"></h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-phone text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Phone</p>
+                        <p id="modal-contact-phone" class="font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-map-marker-alt text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Address</p>
+                        <p id="modal-contact-address" class="font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-book text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Publication Placed</p>
+                        <p id="modal-contact-publication" class="font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-calendar-check text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Return Visit Time</p>
+                        <p id="modal-contact-return-time" class="font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full mr-3">
+                        <i class="fas fa-info-circle text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Status</p>
+                        <p id="modal-contact-status" class="font-medium"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                <button id="mark-completed" 
+                    class="btn-hover transition-all px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex-1 flex items-center justify-center">
+                    <i class="fas fa-check-circle mr-2"></i> Mark Completed
+                </button>
+                <button id="delete-contact" 
+                    class="btn-hover transition-all px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex-1 flex items-center justify-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-5 rounded-xl shadow-lg flex items-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+            <span class="text-gray-700">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center hidden z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="success-message"></span>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center hidden z-50">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span id="error-message"></span>
+    </div>
+
+    <!-- App Script -->
+    <script src="app2.js"></script>
+</body>
+</html>
